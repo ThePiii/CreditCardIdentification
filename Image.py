@@ -28,7 +28,9 @@ class Image:
         gray_img = cv2.cvtColor(num_img, cv2.COLOR_BGR2GRAY)
         dilate_img = self.embossment(gray_img)
         embo_img = cv2.medianBlur(dilate_img, 3)
-        _, thresh_img = cv2.threshold(embo_img, 155, 255, cv2.THRESH_BINARY)
+        # _, thresh_img = cv2.threshold(embo_img, 155, 255, cv2.THRESH_BINARY)
+        thresh_img = cv2.adaptiveThreshold(
+            embo_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 3, 0)  # 自适应二值化
 
         thresh_img = cv2.medianBlur(thresh_img, 3)
         thresh_img = cv2.GaussianBlur(thresh_img, (3, 3), 0)
