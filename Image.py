@@ -9,9 +9,9 @@ class Image:
     remove_back_img = 0
     number_area = 0
 
-    def __init__(self, img):
+    def __init__(self, img):  # 假设读入的都是灰度化后的图片
         self.img = img
-        H, W, _ = img.shape
+        H, W = img.shape
         if H/W > 0.6 and H/W < 0.69:
             self.remove_back_img = cv2.resize(
                 self.img, (self.HEIGHT, self.WIDTH))
@@ -24,9 +24,9 @@ class Image:
 
     def getNumberArea(self):
         num_img = self.number_area
-        h, w, _ = num_img.shape
-        gray_img = cv2.cvtColor(num_img, cv2.COLOR_BGR2GRAY)
-        dilate_img = self.embossment(gray_img)
+        h, w = num_img.shape
+        # gray_img = cv2.cvtColor(num_img, cv2.COLOR_BGR2GRAY)
+        dilate_img = self.embossment(num_img)
         embo_img = cv2.medianBlur(dilate_img, 3)
         # _, thresh_img = cv2.threshold(embo_img, 155, 255, cv2.THRESH_BINARY)
         thresh_img = cv2.adaptiveThreshold(
@@ -77,8 +77,8 @@ class Image:
         resize_img = cv2.resize(
             self.img, (self.HEIGHT, self.WIDTH), 0, 0, cv2.INTER_NEAREST)  # 调整图片大小
         self.img = resize_img
-        gray_img = cv2.cvtColor(resize_img, cv2.COLOR_BGR2GRAY)  # 灰度处理
-        blur_img = cv2.medianBlur(gray_img, 9)  # 中值滤波去除噪声
+        # gray_img = cv2.cvtColor(resize_img, cv2.COLOR_BGR2GRAY)  # 灰度处理
+        blur_img = cv2.medianBlur(self.img, 9)  # 中值滤波去除噪声
         x = cv2.Sobel(blur_img, cv2.CV_32F, 1, 0, 3)  # Sobel边缘检测
         y = cv2.Sobel(blur_img, cv2.CV_32F, 0, 1, 3)
         absX = cv2.convertScaleAbs(x)
@@ -151,8 +151,8 @@ class Image:
                 return ans, ans+label_H
 
     def position(self, img):
-        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # 灰度化
-        gray_img = cv2.dilate(gray_img, None, iterations=2)  # 膨胀
+        # gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # 灰度化
+        gray_img = cv2.dilate(img, None, iterations=2)  # 膨胀
         gray_img = cv2.erode(gray_img, None, iterations=2)  # 腐蚀
 
         emboss_img = self.embossment(gray_img)
@@ -182,5 +182,5 @@ class Image:
 
 if __name__ == '__main__':
     img = 'test_images/1.jpeg'
-    IMG = Image(cv2.imread(img))
+    IMG = Image(cv2.imread(img, 0))
     cv2.imwrite('test1.jpg', IMG.pos_img)
