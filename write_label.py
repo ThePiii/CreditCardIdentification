@@ -11,10 +11,13 @@ def to_text(src, dst1):
     # filenames.sort(key=lambda x: re.search("^[0-9]*", x.split('.')[0]).group()[0:-1])
     labels = []
 
-    for filename in filenames:
+    for i, filename in enumerate(filenames):
         label = re.search("^[0-9_]*", filename.split('.')[0]).group()
         labels.append(label)
+        filenames[i] = "train_img/" + filename
         print(filename, label)
+
+
 
     df = pd.DataFrame([filenames, labels])
 
