@@ -71,9 +71,9 @@ class DataGenerator:
 
                 data.append(gray_img)
                 str_label = correspond_labels[i]
-                labels_length[i][0] = len(str_label)
-                num_label = [char2num_dict[ch] for ch in str_label]
-                for n in range(self.max_label_length - len(str_label)):
+                labels_length[i][0] = len(str_label[0])
+                num_label = [char2num_dict[ch] for ch in str_label[0]]
+                for n in range(self.max_label_length - len(str_label[0])):
                     num_label.append(self.char2num_dict['_'])
 
                 labels.append(num_label)

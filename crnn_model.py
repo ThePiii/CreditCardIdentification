@@ -75,7 +75,7 @@ def net():
     )
 
 y_pred = net(input)
-loss = nn.CTCLoss(blank=)
+loss = nn.CTCLoss()
 loss = loss(input,target, input_lengths, target_lengths)
 ctcloss()
 
