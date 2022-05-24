@@ -17,7 +17,8 @@ def rand(a=0, b=1):
 
 def rand_resize(img, img_name, count, annotation, jitter=.3):
     # img = cv2.imread(PATH + img_name,-1)
-    w, h, _ = img.shape
+    # w, h, _ = img.shape
+    w, h = img.shape
     new_ar = w/h * rand(1-jitter, 1+jitter)/rand(1-jitter, 1+jitter)
     scale = rand(.25, 2)
     if new_ar < 1:
@@ -73,30 +74,31 @@ def rand_resize(img, img_name, count, annotation, jitter=.3):
 #     return count
 #
 
-def colormap(img, img_name, count, annotation):
-    rand_b = rand() + 1
-    rand_g = rand() + 1
-    rand_r = rand() + 1
-    H, W, C = img.shape
-    new_name = img_name[:6] + str(count) + '.png'
-    count += 1
-    dst = np.zeros((H, W, C), np.uint8)
-    for i in range(H):
-        for j in range(W):
-            (b, g, r) = img[i, j]
-            b = int(b * rand_b)
-            g = int(g * rand_g)
-            r = int(r * rand_r)
-            if b > 255:
-                b = 255
-            if g > 255:
-                g = 255
-            if r > 255:
-                r = 255
-            dst[i][j] = (b, g, r)
-    annotation[output_PATH + new_name] = annotation[output_PATH + img_name]
-    cv2.imwrite(output_PATH + new_name, dst)
-    return count
+# def colormap(img, img_name, count, annotation):
+#     rand_b = rand() + 1
+#     rand_g = rand() + 1
+#     rand_r = rand() + 1
+#     # H, W, C = img.shape
+#     H, W = img.shape
+#     new_name = img_name[:6] + str(count) + '.png'
+#     count += 1
+#     dst = np.zeros((H, W), np.uint8)
+#     for i in range(H):
+#         for j in range(W):
+#             (b, g, r) = img[i, j]
+#             b = int(b * rand_b)
+#             g = int(g * rand_g)
+#             r = int(r * rand_r)
+#             if b > 255:
+#                 b = 255
+#             if g > 255:
+#                 g = 255
+#             if r > 255:
+#                 r = 255
+#             dst[i][j] = (b, g, r)
+#     annotation[output_PATH + new_name] = annotation[output_PATH + img_name]
+#     cv2.imwrite(output_PATH + new_name, dst)
+#     return count
 
 
 # def blur(img, img_name, count, annotation):
@@ -127,8 +129,10 @@ def colormap(img, img_name, count, annotation):
 
 
 def noise(img, img_name, count, annotation):
-    H, W, C = img.shape
-    noise_img = np.zeros((H, W, C), np.uint8)
+    # H, W, C = img.shape
+    H, W = img.shape
+    # noise_img = np.zeros((H, W, C), np.uint8)
+    noise_img = np.zeros((H, W), np.uint8)
 
     for i in range(H):
         for j in range(W):
@@ -137,7 +141,8 @@ def noise(img, img_name, count, annotation):
     for i in range(500):
         x = np.random.randint(H)
         y = np.random.randint(W)
-        noise_img[x, y, :] = 255
+        # noise_img[x, y, :] = 255
+        noise_img[x, y] = 255
 
     new_name = img_name[:6] + str(count) + '.png'
     count += 1
@@ -148,10 +153,12 @@ def noise(img, img_name, count, annotation):
 
 def concat(img, img_name, count, annotation, img_list):  # 随机拼接
     # img = cv2.imread(PATH+img_name)
-    H, W, C = img.shape
+    # H, W, C = img.shape
+    H, W = img.shape
     num = int(rand(4, 6))
     imgs = random.sample(img_list, num)
-    dst = np.zeros((H, W*(num+1), C), np.uint8)
+    # dst = np.zeros((H, W*(num+1), C), np.uint8)
+    dst = np.zeros((H, W * (num + 1)), np.uint8)
     for h in range(H):
         for w in range(W):
             dst[h, w] = img[h, w]
@@ -162,7 +169,7 @@ def concat(img, img_name, count, annotation, img_list):  # 随机拼接
     boxes = copy.copy(annotation[PATH + img_name])
 
     for i, image_name in enumerate(imgs):
-        image = cv2.imread(PATH + image_name)
+        image = cv2.imread(PATH + image_name, 0)
         for h in range(H):
             for w in range(W):
                 dst[h, W*(i+1)+w] = image[h, w]
@@ -176,7 +183,7 @@ def concat(img, img_name, count, annotation, img_list):  # 随机拼接
     count = noise(dst, new_name, count, annotation)
     for i in range(4):
         count = rand_resize(dst, new_name, count, annotation)  # 4
-    count = colormap(dst, new_name, count, annotation)  # 1
+    # count = colormap(dst, new_name, count, annotation)  # 1
     # count = blur(dst, new_name, count, annotation)  # 4
     # count = place_img(dst, new_name, count, annotation)  # 4
 
@@ -223,7 +230,7 @@ if __name__ == '__main__':
     非多进程处理数据
     '''
     for img_name in img_list:
-        img = cv2.imread(PATH + img_name,-1)
+        img = cv2.imread(PATH + img_name, 0)
         main(img,img_name,annotation)
 
     train_file = open('train.txt', 'w')
