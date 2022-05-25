@@ -10,9 +10,9 @@ class BiLSTM_add(nn.Module):
 
 
     def forward(self,input):
-        _,n = input.shape
-        input[:,:int(n/2)] = input[:,:int(n/2)] + input[:,int(n/2):]
-        return input[:,:int(n/2)]
+        _,_,_,n = input.shape
+        input[:,:,:int(n/2)] = input[:,:,:int(n/2)] + input[:,:,int(n/2):]
+        return input[:,:,:int(n/2)]
 
 class SelectItem(nn.Module):
     def __init__(self,item_index):
@@ -24,58 +24,58 @@ class SelectItem(nn.Module):
         return inputs[self.item_index]
 
     # img_size = (height:256, width:32)
-    input = torch.tensor().view(picture_height, picture_width)
 
-def net():
+class crnn(nn.Module):
+    def __init__(self):
+        super(crnn, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(1, 64, 3,stride = 1,padding='same',bias=True),   # input (N,C,H,W)  (64,1,32,256)
+            nn.BatchNorm2d(1),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2)),
 
-# 记得返回来写一下权重初始化
-    cnn_part = nn.Sequential(
-        nn.Conv2d(1, 64, 3,stride = 1,padding='same',bias=True),
-        nn.BatchNorm1d(),
-        nn.ReLU(),  # kernel_size, stride
-        nn.MaxPool2d((2, 2)),
+            nn.Conv2d(64, 128, 3,stride = 1,padding='same',bias=True),  # (64,64,16,128)
+            nn.BatchNorm2d(1),
+            nn.ReLU(),  # kernel_size, stride
+            nn.MaxPool2d((2, 2)),
 
-        nn.Conv2d(64, 128, 3,stride = 1,padding='same',bias=True),  # in_channels, out_channels, kernel_size
-        nn.BatchNorm1d(),
-        nn.ReLU(),  # kernel_size, stride
-        nn.MaxPool2d((2, 2)),
+            nn.Conv2d(128, 256, 3,stride = 1,padding='same',bias=True),  # (64,128,8,64)
+            nn.BatchNorm2d(1),
+            nn.ReLU(),  # kernel_size, stride
+            nn.Conv2d(256, 256, 3,stride = 1,padding='same',bias=True),  # (64,128,8,64)
+            nn.BatchNorm2d(1),
+            nn.ReLU(),  # kernel_size, stride
+            nn.MaxPool2d((2, 1),stride=(2,1)),
 
-        nn.Conv2d(128, 256, 3,stride = 1,padding='same',bias=True),  # in_channels, out_channels, kernel_size
-        nn.BatchNorm1d(),
-        nn.ReLU(),  # kernel_size, stride
-        nn.Conv2d(256, 256, 3,stride = 1,padding='same',bias=True),  # in_channels, out_channels, kernel_size
-        nn.BatchNorm1d(),
-        nn.ReLU(),  # kernel_size, stride
-        nn.MaxPool2d((2, 1),stride=(2,1)),
+            nn.Conv2d(256, 512, 3, stride=1, padding='same', bias=True),  # (64,256,4,64)
+            nn.BatchNorm2d(1),
+            nn.ReLU(),  # kernel_size, stride
+            nn.Conv2d(512, 512, 3, stride=1, padding='same', bias=True),  # (64,512,4,64)
+            nn.BatchNorm2d(1),
+            nn.ReLU(),  # kernel_size, stride
+            nn.MaxPool2d((2, 1), stride=(2, 1)),
 
-        nn.Conv2d(256, 512, 3, stride=1, padding='same', bias=True),  # in_channels, out_channels, kernel_size
-        nn.BatchNorm1d(),
-        nn.ReLU(),  # kernel_size, stride
-        nn.Conv2d(512, 512, 3, stride=1, padding='same', bias=True),  # in_channels, out_channels, kernel_size
-        nn.BatchNorm1d(),
-        nn.ReLU(),  # kernel_size, stride
-        nn.MaxPool2d((2, 1),stride=(2,1)),
+            nn.Conv2d(512, 512, 3, stride=1, padding='same', bias=True),  # (64,512,2,64)
+            nn.BatchNorm2d(1),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 1))
+        )  # (64,512,1,64)
 
-        nn.Conv2d(512, 512, 3, stride=1, padding='same', bias=True),  # in_channels, out_channels, kernel_size
-        nn.BatchNorm1d(),
-        nn.ReLU(),
-        nn.MaxPool2d((2, 1)),
+        self.rnn = nn.Sequential(
+            nn.LSTM(bidirectional=True, hidden_size=256, input_size=64),  #   input_size (L,N,H) -> (512,64,64)
+            SelectItem(0),
+        # keras 里面的bilstm可以指定合并方式，但是pytorch里不能,但有必要搞么
+            BiLSTM_add(),
+            nn.BatchNorm2d(1),
+            nn.LSTM(bidirectional=True, hidden_size=256, input_size=256), # (512,64,256)
+            SelectItem(0),
+            nn.Linear(in_features=512, out_features=11), # (512,64,11)
+            # 这里和原代码不一样，原代码好像是直接用softmax
+            nn.LogSoftmax() # ()
+        )
 
-
-    # rnn_part
-        nn.LSTM(bidirectional=True, hidden_size=256, input_size=512),
-        SelectItem(0),
-    # keras 里面的bilstm可以指定合并方式，但是pytorch里不能,但有必要搞么
-        BiLSTM_add(),
-        nn.BatchNorm1d(),
-        nn.LSTM(bidirectional=True, hidden_size=256, input_size=256),
-        SelectItem(0),
-        nn.Linear(in_features=512, out_features=11),
-        nn.Softmax()
-    )
-
-y_pred = net(input)
-loss = nn.CTCLoss()
-loss = loss(input,target, input_lengths, target_lengths)
-ctcloss()
-
+    def forward(self, img):
+        feature = self.conv(img)
+        feature = torch.permute(torch.permute(feature.squeeze(),(0,2,1)),(1,0,2))
+        output = self.rnn(feature)
+        return output
