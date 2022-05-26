@@ -14,7 +14,8 @@ epochs = 100
 batch_size = 64
 
 
-save_PATH = "model/model.pt"
+# save_PATH = "model/model.pth"
+save_PATH = "/content/drive/Mydrive/model/crnn.pth"
 
 def train():
     train_data = DataGenerator(train_txt, img_size, down_sample_factor, batch_size, max_label_length)
@@ -22,7 +23,7 @@ def train():
     net = crnn().float()
 
     try:
-        net.load_state_dict(torch.load(PATH))
+        net.load_state_dict(torch.load(save_PATH))
         print("restore model successful...")
     except:
         print("Create new model...")
@@ -45,6 +46,7 @@ def train():
             optimizer.step()
             train_ls_temp += l
         train_ls.append(train_ls_temp)
+        torch.save(net.state_dict(), save_PATH)
     print(train_ls[:10])
 
 

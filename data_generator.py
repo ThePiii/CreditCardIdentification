@@ -63,7 +63,7 @@ class DataGenerator:
             correspond_labels = self.img_labels_chars_list[to_network_idx]
             for i, img_file in enumerate(img_to_network):
                 img = cv2.imread(img_file)
-                gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                # gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 gray_img = cv2.resize(gray_img, (self.img_w, self.img_h))
                 gray_img = gray_img.astype(np.float32)
 
