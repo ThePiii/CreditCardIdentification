@@ -28,8 +28,10 @@ def train():
         print("Create new model...")
         pass
 
+    train_ls = []
     optimizer = torch.optim.Adam(params=net.parameters())
     for epoch in range(epochs):
+        train_ls_temp = 0
         for X, _ in train_data.get_data():
             img = X['pic_inputs']
             input_lengths = X['input_lengths']
@@ -41,6 +43,9 @@ def train():
             l = loss(log_probs, targets, input_lengths, target_lengths) # log_probs,targets,input_lengths,target_lengths
             l.backward()
             optimizer.step()
+            train_ls_temp += l
+        train_ls.append(train_ls_temp)
+    print(train_ls[:10])
 
 
 

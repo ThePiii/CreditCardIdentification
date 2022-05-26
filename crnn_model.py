@@ -72,16 +72,17 @@ class crnn(nn.Module):
         )  # (64,512,1,64)
 
         self.rnn = nn.Sequential(
-            nn.LSTM(bidirectional=True, hidden_size=256, input_size=64,batch_first=True),  #   input_size (N,L,H) -> (64,512,64)
+            Permute((0,2,1)),
+            nn.LSTM(bidirectional=True, hidden_size=256, input_size=512,batch_first=True),  #   input_size (N,L,H) -> (64,64,512)
             SelectItem(0),
         # keras 里面的bilstm可以指定合并方式，但是pytorch里不能,但有必要搞么
-            BiLSTM_add(), # (64, 512, 512)_
-            nn.LayerNorm(256),  # (64,512,256)  input_size(N,L,H) -> (64,512,256)
-            nn.LSTM(bidirectional=True, hidden_size=256, input_size=256,batch_first=True),  # (64,512,256)
+            BiLSTM_add(), # (64, 64, 512)_
+            nn.LayerNorm(256),  # (64,64,256)  input_size(N,L,H) -> (64,64,256)
+            nn.LSTM(bidirectional=True, hidden_size=256, input_size=256,batch_first=True),  # (64,64,256)
             SelectItem(0),
-            nn.Linear(in_features=512, out_features=11),  # (64,512,11)
+            nn.Linear(in_features=512, out_features=11),  # (64,64,512)
             # 这里和原代码不一样，原代码好像是直接用softmax
-            nn.LogSoftmax(dim=-1) # ()
+            nn.LogSoftmax(dim=-1) # (64,64,11)
         )
 
     def forward(self, img):
