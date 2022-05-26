@@ -50,6 +50,7 @@ def train():
             l.backward()
             optimizer.step()
             train_ls_temp += l
+            print(train_ls_temp)
         train_ls.append(train_ls_temp)
         print("第{}次训练的loss：{}".format(epoch, train_ls_temp))
         torch.save(net.state_dict(), save_PATH)
