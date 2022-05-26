@@ -13,6 +13,7 @@ down_sample_factor = 4
 epochs = 100
 batch_size = 64
 
+device = torch.device("cuda")
 
 # save_PATH = "model/model.pth"
 save_PATH = "/content/drive/Mydrive/model/crnn.pth"
@@ -20,7 +21,9 @@ save_PATH = "/content/drive/Mydrive/model/crnn.pth"
 def train():
     train_data = DataGenerator(train_txt, img_size, down_sample_factor, batch_size, max_label_length)
     loss = nn.CTCLoss(blank=10)
+    loss = loss.to(device)
     net = crnn().float()
+    net = net.to(device)
 
     try:
         net.load_state_dict(torch.load(save_PATH))
@@ -29,14 +32,16 @@ def train():
         print("Create new model...")
         pass
 
-    train_ls = []
+    # train_ls = []
     optimizer = torch.optim.Adam(params=net.parameters())
     for epoch in range(epochs):
         train_ls_temp = 0
         for X, _ in train_data.get_data():
             img = X['pic_inputs']
+            img = img.to(device)
             input_lengths = X['input_lengths']
             targets = X['targets']   # 好像是输入图片label数
+            targets = targets.to(device)
             target_lengths = X['target_lengths']
             log_probs = net(img)
             net = net.float()
@@ -46,8 +51,10 @@ def train():
             optimizer.step()
             train_ls_temp += l
         train_ls.append(train_ls_temp)
+        print("第{}次训练的loss：{}".format(epoch, train_ls_temp))
         torch.save(net.state_dict(), save_PATH)
-    print(train_ls[:10])
+
+    # print(train_ls[:10])
 
 
 
