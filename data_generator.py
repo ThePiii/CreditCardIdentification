@@ -34,7 +34,7 @@ class DataGenerator:
         # 0000
         self.img_labels_chars_list = [line.split("\n")[0].split(" ")[
             1:] for line in data_txt_list]
-        self.img_labels_chars_list = np.array(self.img_labels_chars_list)
+        self.img_labels_chars_list = np.array(self.img_labels_chars_list,dtype=object)
         #多少张图片
         self.img_number = len(self.img_list)
         data_txt.close()
@@ -82,8 +82,8 @@ class DataGenerator:
             labels = np.array(labels, dtype=np.float64)
             inputs = {"targets": torch.tensor(labels, dtype=torch.float),   # (64,26)  图片的真实标签，为什么是26
                       "pic_inputs": torch.tensor(data, dtype=torch.float),
-                      "input_lengths": torch.tensor(pred_labels_length, dtype=torch.float),    # (64,1) 值为64,指输入的个数
-                      "target_lengths": torch.tensor(labels_length, dtype=torch.float)}  # (64,1) 值为4，指label里有几个字符
+                      "input_lengths": torch.tensor(pred_labels_length, dtype=torch.int),    # (64,1) 值为64,指输入的个数
+                      "target_lengths": torch.tensor(labels_length, dtype=torch.int)}  # (64,1) 值为4，指label里有几个字符
             # outputs 存在意义？
             outputs = {"ctc_loss_output": torch.zeros(
                 (self.batch_size, 1), dtype=torch.float)}
