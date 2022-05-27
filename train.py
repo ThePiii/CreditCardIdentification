@@ -20,7 +20,7 @@ else:
     device = torch.device("cpu")
 
 save_PATH = "model/model.pth"
-save_PATH_drive = Path("/content/drive/Mydrive/model/model.pth")
+save_PATH_drive = Path("/content/drive/MyDrive/model/model.pth")
 
 def train():
     train_data = DataGenerator(train_txt, img_size, down_sample_factor, batch_size, max_label_length)
