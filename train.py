@@ -57,8 +57,8 @@ def train():
             train_ls_temp += l
             count += 1
             print(train_ls_temp)
-            if count % 500 == 0:
-                print("---- 导入500个数据了, 保存到Google Drive一下 ----")
+            if count % 50 == 0:
+                print("---- 训练50个数据了, 保存一下模型 ----")
                 torch.save(net.state_dict(), save_PATH)
                 if save_PATH_drive.is_dir():
                     torch.save(net.state_dict(), save_PATH_drive)

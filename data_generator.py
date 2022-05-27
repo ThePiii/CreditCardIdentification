@@ -69,7 +69,8 @@ class DataGenerator:
 
                 data.append(gray_img)
                 str_label = correspond_labels[i]
-                labels_length[i][0] = len(str_label[0])
+                # labels_length[i][0] = len(str_label[0])
+                labels_length[i][0] = len(str_label)   # 没有空格，不需要索引第一个为lable
                 #他这里把label里面的_识别成10了，这样可以么？
                 num_label = [char2num_dict[ch] for ch in str_label[0]]
 
