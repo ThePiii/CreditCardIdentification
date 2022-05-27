@@ -65,8 +65,8 @@ def train():
         train_ls.append(train_ls_temp)
         print("第{}轮训练的loss：{}".format(epoch, train_ls_temp))
         torch.save(net.state_dict(), save_PATH)
-        if save_PATH_drive.is_dir():
-            torch.save(net.state_dict(), save_PATH_drive)
+        if save_PATH_drive.is_file():
+            torch.save(net.state_dict(), str(save_PATH_drive))
 
     # print(train_ls[:10])
 
