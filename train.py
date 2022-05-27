@@ -56,11 +56,12 @@ def train():
             optimizer.step()
             train_ls_temp += l
             count += 1
-            print(train_ls_temp)
+            # print(train_ls_temp)
             if count % 50 == 0:
                 print("---- 训练50个数据了, 保存一下模型 ----")
                 torch.save(net.state_dict(), save_PATH)
-                if save_PATH_drive.is_dir():
+                if save_PATH_drive.is_file() and count % 500 == 0:
+                    print("---- 训练500个数据了，保存一下模型到Drive ----")
                     torch.save(net.state_dict(), save_PATH_drive)
         train_ls.append(train_ls_temp)
         print("第{}轮训练的loss：{}".format(epoch, train_ls_temp))
