@@ -43,10 +43,10 @@ def train():
         count = 0
         for X, _ in train_data.get_data():
             img = X['pic_inputs']
-            # img = img.to(device)
+            img = img.to(device)
             input_lengths = X['input_lengths']
             targets = X['targets']   # 好像是输入图片label数
-            # targets = targets.to(device)
+            targets = targets.to(device)
             target_lengths = X['target_lengths']
             log_probs = net(img)
             net = net.float()
