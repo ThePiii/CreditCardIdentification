@@ -11,8 +11,8 @@ class BiLSTM_add(nn.Module):
 
     def forward(self,input):
         _,_,n = input.shape
-        input[:,:,:int(n/2)] = input[:,:,:int(n/2)] + input[:,:,int(n/2):]
-        return input[:,:,:int(n/2)]
+        output = input[:,:,:int(n/2)] + input[:,:,int(n/2):]
+        return output
 
 class Permute(nn.Module):
     def __init__(self, orders):

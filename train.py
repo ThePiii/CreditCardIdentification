@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from data_generator import DataGenerator
 from crnn_model import crnn
+from pathlib import Path
 
 train_txt = "train.txt"
 val_txt_path = "val.txt"
@@ -19,7 +20,7 @@ else:
     device = torch.device("cpu")
 
 save_PATH = "model/model.pth"
-# save_PATH = "/content/drive/Mydrive/model/crnn.pth"
+save_PATH_drive = Path("/content/drive/Mydrive/model/model.pth")
 
 def train():
     train_data = DataGenerator(train_txt, img_size, down_sample_factor, batch_size, max_label_length)
@@ -29,7 +30,7 @@ def train():
     net = net.to(device)
 
     try:
-        net.load_state_dict(torch.load(save_PATH))
+        net.load_state_dict(torch.load(save_PATH_drive))
         print("restore model successful...")
     except:
         print("Create new model...")
@@ -39,6 +40,7 @@ def train():
     optimizer = torch.optim.Adam(params=net.parameters())
     for epoch in range(epochs):
         train_ls_temp = 0
+        count = 0
         for X, _ in train_data.get_data():
             img = X['pic_inputs']
             # img = img.to(device)
@@ -53,11 +55,18 @@ def train():
             l.backward()
             optimizer.step()
             train_ls_temp += l
+            count += 1
             print(train_ls_temp)
-            torch.save(net.state_dict(), save_PATH)
+            if count % 500 == 0:
+                print("---- 导入500个数据了, 保存到Google Drive一下 ----")
+                torch.save(net.state_dict(), save_PATH)
+                if save_PATH_drive.is_dir():
+                    torch.save(net.state_dict(), save_PATH_drive)
         train_ls.append(train_ls_temp)
-        print("第{}次训练的loss：{}".format(epoch, train_ls_temp))
+        print("第{}轮训练的loss：{}".format(epoch, train_ls_temp))
         torch.save(net.state_dict(), save_PATH)
+        if save_PATH_drive.is_dir():
+            torch.save(net.state_dict(), save_PATH_drive)
 
     # print(train_ls[:10])
 
