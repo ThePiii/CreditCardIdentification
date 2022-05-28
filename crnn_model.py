@@ -82,7 +82,8 @@ class crnn(nn.Module):
             SelectItem(0),
             nn.Linear(in_features=512, out_features=11),  # (64,64,512)
             # 这里和原代码不一样，原代码好像是直接用softmax
-            nn.LogSoftmax(dim=-1) # (64,64,11)
+            nn.LogSoftmax(dim=-1), # (64,64,11)
+            Permute((1, 0, 2))
         )
 
     def forward(self, img):
