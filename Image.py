@@ -181,6 +181,6 @@ class Image:
 
 
 if __name__ == '__main__':
-    img = 'test_images/1.jpeg'
+    img = 'test_images/7.jpeg'
     IMG = Image(cv2.imread(img, 0))
-    cv2.imwrite('test1.jpg', IMG.pos_img)
+    cv2.imwrite('test7.jpg', IMG.pos_img)
