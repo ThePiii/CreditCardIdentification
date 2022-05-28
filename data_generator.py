@@ -1,4 +1,3 @@
-
 import torch
 import numpy as np
 import cv2
@@ -15,13 +14,13 @@ class DataGenerator:
     这个类是从txt文件里面读取图片文件名，以及对应的gt
     '''
 
-# down_sample_factor 是 4 是因为 每张图片里有4个数字
+# down_sample_factor 是 4 是因为模型架构
     def __init__(self, txt_file_path, img_size, down_sample_factor, batch_size, max_label_length):
         self.txt_file_path = txt_file_path
         self.img_w, self.img_h = img_size
         self.batch_size = batch_size
         self.max_label_length = max_label_length
-        # 这是每个数字对应的列数
+        # 这是每张图片对应的序列数
         self.each_pred_label_length = int(self.img_w // down_sample_factor)
 
         # 从train.txt文件中获取文件名以及所对应的标签,其中每一行形式为 train_img/0000a_0.png 0000
@@ -47,12 +46,12 @@ class DataGenerator:
 
     def get_data(self, is_training=True):
 
-        labels_length = np.zeros((self.batch_size, 1))
+        labels_length = np.zeros((self.batch_size, ))
         # 就是说每个数字占了几列像素
         pred_labels_length = np.full(
-            (self.batch_size, 1), self.each_pred_label_length, dtype=np.float64)
+            (self.batch_size, ), self.each_pred_label_length, dtype=np.float64)
         while True:
-            data, labels = [], []
+            data, labels = [], np.array([])
             #随机不重复抽取batch_size张图片的index
             to_network_idx = np.random.choice(
                 self.img_number, self.batch_size, replace=False)
@@ -69,35 +68,26 @@ class DataGenerator:
 
                 data.append(gray_img)
                 str_label = correspond_labels[i]
-                # labels_length[i][0] = len(str_label[0])
-                labels_length[i][0] = len(str_label)   # 没有空格，不需要索引第一个为lable
-                #他这里把label里面的_识别成10了，这样可以么？
+                labels_length[i] = len(str_label)
                 num_label = [char2num_dict[ch] for ch in str_label]
 
-                for n in range(self.max_label_length - len(str_label)):
-                    num_label.append(self.char2num_dict['_'])
+                # for n in range(self.max_label_length - len(str_label)):
+                #     num_label.append(self.char2num_dict['_'])
 
-                labels.append(num_label)
+                labels = np.hstack((labels,num_label))
             data = np.array(data, dtype=np.float64) / 255.0 * 2 - 1  # 零中心化
             data = np.expand_dims(data, axis=1)  # 这里改了一下让维度对应后面net的输入
             labels = np.array(labels, dtype=np.float64)
-            inputs = {"targets": torch.tensor(labels, dtype=torch.float),   # (64,26)  图片的真实标签，为什么是26
+            inputs = {"targets": torch.tensor(labels, dtype=torch.float),   # (64,26)  图片的真实标签，26因为ctcloss在每个标签前后都加了空       需要变成一维
                       "pic_inputs": torch.tensor(data, dtype=torch.float),
-                      "input_lengths": torch.tensor(pred_labels_length, dtype=torch.int),    # (64,1) 值为64,指输入的个数
-                      "target_lengths": torch.tensor(labels_length, dtype=torch.int)}  # (64,1) 值为4，指label里有几个字符
-            # outputs 存在意义？
-            outputs = {"ctc_loss_output": torch.zeros(
-                (self.batch_size, 1), dtype=torch.float)}
+                      "input_lengths": torch.tensor(pred_labels_length, dtype=torch.int),    # (64,) 值为64,指sequence length
+                      "target_lengths": torch.tensor(labels_length, dtype=torch.int)}  # (64,) ，指每个样本的label的个数：0000 -> 4
             if is_training:
-                yield (inputs, outputs)
+                yield (inputs,1)
             else:
                 yield (data, pred_labels_length)
 
 # 各种路径 以及参数
 # weight_save_path = "model/"
 # 数字训练路径
-
-
-
-
 

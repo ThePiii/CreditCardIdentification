@@ -23,6 +23,13 @@ save_PATH = "model/model.pth"
 save_PATH_drive = Path("/content/drive/MyDrive/model/model.pth")
 
 def train():
+    def weight_init(m):
+        if isinstance(m, nn.Conv2d):
+            nn.init.kaiming_normal_(m.weight)
+            nn.init.kaiming_normal_(m.bias)
+        elif isinstance(m, nn.LSTM):
+            nn.init.kaiming_normal_(m.weight)
+            nn.init.kaiming_normal_(m.bias)
     train_data = DataGenerator(train_txt, img_size, down_sample_factor, batch_size, max_label_length)
     loss = nn.CTCLoss(blank=10)
     loss = loss.to(device)
@@ -57,8 +64,8 @@ def train():
             train_ls_temp += l
             count += 1
             # print(train_ls_temp)
-            if count % 50 == 0:
-                print("---- 训练50个数据了, 保存一下模型 ----")
+            if count % 100 == 0:
+                print("---- 训练100个数据了, 保存一下模型 ----")
                 torch.save(net.state_dict(), save_PATH)
                 if save_PATH_drive.is_file() and count % 500 == 0:
                     print("---- 训练500个数据了，保存一下模型到Drive ----")
@@ -69,9 +76,11 @@ def train():
         if save_PATH_drive.is_file():
             torch.save(net.state_dict(), str(save_PATH_drive))
 
-    # print(train_ls[:10])
+    return train_ls
 
 
 
 if __name__ == '__main__':
     train()
+    plt.plot(train_ls, '-')
+    plt.show()
