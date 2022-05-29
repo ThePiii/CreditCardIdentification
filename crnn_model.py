@@ -88,6 +88,6 @@ class crnn(nn.Module):
 
     def forward(self, img):
         feature = self.conv(img)
-        feature = feature.squeeze()
+        feature = feature.squeeze(axis=2)
         output = self.rnn(feature)
         return output
