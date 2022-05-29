@@ -2,6 +2,7 @@ import cv2
 import numpy as np 
 from crnn_model import crnn
 import torch
+from Image import Image
 
 char2num_dict = {'0': 0, '1': 1, '2':2, '3': 3, 
                 '4': 4, '5': 5, '6': 6, '7': 7, 
@@ -47,6 +48,7 @@ def single_recognition(img,model_dir):
 
     model_for_predict = crnn().float()
     model_for_predict.load_state_dict(torch.load(model_dir))
+    # model_for_predict.load_state_dict(torch.load(model_dir, map_location='cpu'))
     model_for_predict.eval()
 
     y_pred_probMatrix = model_for_predict(img)
@@ -61,7 +63,9 @@ def single_recognition(img,model_dir):
 
 
 
-img = cv2.imread('test1.jpg',0)
+img = cv2.imread("test_images/7.jpeg", 0)
+IMG = Image(img)
+pred_labels = single_recognition(IMG.pos_img, model_dir)
 
-pred_labels = single_recognition(img,model_dir)
-
+# img = cv2.imread("test1.jpg", 0)
+# pred_labels = single_recognition(img, model_dir)
