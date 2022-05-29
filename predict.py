@@ -28,7 +28,7 @@ class GreedyCTCDecoder(torch.nn.Module):
         """
         indices = torch.argmax(emission, dim=-1)  # [num_seq,]
         indices = torch.unique_consecutive(indices, dim=-1)
-        indices = [i for i in indices if i != self.blank]
+        indices = [int(i) for i in indices if i != self.blank]
         joined = "".join([self.labels[i] for i in indices])
         return joined
     
@@ -57,7 +57,6 @@ def single_recognition(img,model_dir):
     # Decode 阶段 
     decoder = GreedyCTCDecoder(labels = num2char_dict) # 使用的是最简单的贪婪算法
     y_pred_labels = decoder(y_pred_probMatrix)
-    print(len(y_pred_labels))
     
     return y_pred_labels
 
@@ -66,6 +65,7 @@ def single_recognition(img,model_dir):
 img = cv2.imread("test_images/7.jpeg", 0)
 IMG = Image(img)
 pred_labels = single_recognition(IMG.pos_img, model_dir)
+print("识别结果为：", pred_labels)
 
 # img = cv2.imread("test1.jpg", 0)
 # pred_labels = single_recognition(img, model_dir)
