@@ -40,6 +40,7 @@ def train():
         net.load_state_dict(torch.load(save_PATH_drive))
         print("restore model successful...")
     except:
+        net.apply(weight_init)
         print("Create new model...")
         pass
 
@@ -70,7 +71,7 @@ def train():
                 if save_PATH_drive.is_file() and count % 500 == 0:
                     print("---- 训练500个数据了，保存一下模型到Drive ----")
                     torch.save(net.state_dict(), save_PATH_drive)
-        train_ls.append(train_ls_temp)
+        train_ls.append(train_ls_temp/6250)
         print("第{}轮训练的loss：{}".format(epoch, train_ls_temp))
         torch.save(net.state_dict(), save_PATH)
         if save_PATH_drive.is_file():
@@ -81,6 +82,6 @@ def train():
 
 
 if __name__ == '__main__':
-    train()
+    train_ls = train()
     plt.plot(train_ls, '-')
     plt.show()

@@ -1,17 +1,17 @@
 import cv2
-import numpy as np 
+import numpy as np
 from crnn_model import crnn
 import torch
 from Image import Image
 
-char2num_dict = {'0': 0, '1': 1, '2':2, '3': 3, 
-                '4': 4, '5': 5, '6': 6, '7': 7, 
+char2num_dict = {'0': 0, '1': 1, '2':2, '3': 3,
+                '4': 4, '5': 5, '6': 6, '7': 7,
                 '8': 8, '9': 9, '_': 10}
 num2char_dict = {value : key for key, value in char2num_dict.items()}
 
 model_dir = "model/model.pth"
 
-    
+
 class GreedyCTCDecoder(torch.nn.Module):
     def __init__(self, labels, blank=10):
         super().__init__()
@@ -31,8 +31,8 @@ class GreedyCTCDecoder(torch.nn.Module):
         indices = [int(i) for i in indices if i != self.blank]
         joined = "".join([self.labels[i] for i in indices])
         return joined
-    
-    
+
+
 def single_recognition(img,model_dir):
     '''
     输入的是np array
@@ -43,7 +43,7 @@ def single_recognition(img,model_dir):
     img = np.expand_dims(img, axis=0)
     img = np.expand_dims(img, axis=0)
     img = torch.tensor(img, dtype=torch.float)
-    
+
     # 载入模型
 
     model_for_predict = crnn().float()
@@ -51,13 +51,13 @@ def single_recognition(img,model_dir):
     # model_for_predict.load_state_dict(torch.load(model_dir, map_location='cpu'))
     model_for_predict.eval()
 
-    y_pred_probMatrix = model_for_predict(img)
+    y_pred_probMatrix = model_for_predict(img).squeeze()
 
 
-    # Decode 阶段 
+    # Decode 阶段
     decoder = GreedyCTCDecoder(labels = num2char_dict) # 使用的是最简单的贪婪算法
     y_pred_labels = decoder(y_pred_probMatrix)
-    
+
     return y_pred_labels
 
 
