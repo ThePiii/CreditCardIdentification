@@ -23,13 +23,14 @@ save_PATH = "model/model.pth"
 save_PATH_drive = Path("/content/drive/MyDrive/model/model.pth")
 
 def train():
-    def weight_init(m):
-        if isinstance(m, nn.Conv2d):
-            nn.init.kaiming_normal_(m.weight)
-            nn.init.kaiming_normal_(m.bias)
-        elif isinstance(m, nn.LSTM):
-            nn.init.kaiming_normal_(m.weight)
-            nn.init.kaiming_normal_(m.bias)
+    # def weight_init(m):
+    #     if isinstance(m, nn.Conv2d):
+    #         nn.init.kaiming_normal_(m.weight)
+    #         nn.init.kaiming_normal_(m.bias)
+    #     elif isinstance(m, nn.LSTM):
+    #         nn.init.kaiming_normal_(m.weight)
+    #         nn.init.kaiming_normal_(m.bias)
+
     train_data = DataGenerator(train_txt, img_size, down_sample_factor, batch_size, max_label_length)
     loss = nn.CTCLoss(blank=10)
     loss = loss.to(device)
@@ -40,7 +41,7 @@ def train():
         net.load_state_dict(torch.load(save_PATH_drive))
         print("restore model successful...")
     except:
-        net.apply(weight_init)
+        # net.apply(weight_init)
         print("Create new model...")
         pass
 
